@@ -1,0 +1,45 @@
+# Prompts and design notes
+prompt.md
+*.prompt.md
+
+# Legacy jev_local files
+*jev_local*
+src/*jev_local*
+
+# MSVC / Windows build artifacts
+*.obj
+*.lib
+*.dll
+*.exp
+*.def
+*.pdb
+*.ilk
+*.idb
+
+# Linux / GCC build artifacts
+*.o
+*.so
+*.a
+*.dylib
+*.out
+
+# CMake build directory and temporary files
+build/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+# IDE & editor temporary files
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# OS artifacts
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store

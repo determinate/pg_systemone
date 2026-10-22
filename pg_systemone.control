@@ -1,0 +1,5 @@
+# pg_systemone PostgreSQL extension
+comment = 'Inference extension for SystemOne decision models (Julia-1, Lev, Kev via llama.cpp)'
+default_version = '1.0'
+module_pathname = '$libdir/pg_systemone'
+relocatable = true
