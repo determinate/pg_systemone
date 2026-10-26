@@ -1,0 +1,50 @@
+# syntax=docker/dockerfile:1
+ARG PG_VERSION=17
+FROM postgres:${PG_VERSION}-bookworm AS builder
+
+ARG PG_VERSION
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install build dependencies
+# In official postgres images, $PG_MAJOR is automatically defined (e.g. 14, 15, 16, 17)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    postgresql-server-dev-${PG_MAJOR} \
+    libcurl4-openssl-dev \
+    ca-certificates \
+    tar \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+# Copy build configuration and sources
+COPY Makefile ./
+COPY pg_systemone.control pg_systemone--1.0.sql ./
+COPY jev_local.control jev_local--1.0.sql ./
+COPY src/ ./src/
+
+# Compile pg_systemone.so (and jev_local.so for backward compatibility)
+RUN make clean && make && \
+    mkdir -p /output && \
+    cp pg_systemone.so pg_systemone.control pg_systemone--1.0.sql /output/ && \
+    (make clean && make MODULE_big=jev_local OBJS="src/jev_local.o src/cJSON.o" && cp jev_local.so jev_local.control jev_local--1.0.sql /output/ 2>/dev/null || true) && \
+    cd /output && \
+    tar -czvf "pg_systemone-v1.0-pg${PG_MAJOR}-linux-x86_64.tar.gz" pg_systemone.so pg_systemone.control pg_systemone--1.0.sql && \
+    (tar -czvf "jev_local-v1.0-pg${PG_MAJOR}-linux-x86_64.tar.gz" jev_local.so jev_local.control jev_local--1.0.sql 2>/dev/null || true)
+
+# Create entrypoint inside the Linux image to avoid any Windows CRLF issues
+RUN printf '#!/bin/bash\n\
+set -e\n\
+OUT_DIR="/dist/pg$${PG_MAJOR}"\n\
+mkdir -p "$${OUT_DIR}"\n\
+cp -f /output/* "$${OUT_DIR}/"\n\
+cp -f /output/*.tar.gz /dist/ 2>/dev/null || true\n\
+echo "======================================================================="\n\
+echo " [SUCCESS] PostgreSQL $${PG_MAJOR} build complete!"\n\
+echo " Files copied to: $${OUT_DIR}"\n\
+echo " Releases tarball: /dist/pg_systemone-v1.0-pg$${PG_MAJOR}-linux-x86_64.tar.gz"\n\
+echo "======================================================================="\n\
+ls -lh "$${OUT_DIR}"\n\
+' > /docker-entrypoint-build.sh && chmod +x /docker-entrypoint-build.sh
+
+ENTRYPOINT ["/docker-entrypoint-build.sh"]

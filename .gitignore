@@ -22,6 +22,8 @@ src/*jev_local*
 *.a
 *.dylib
 *.out
+dist/
+*.tar.gz
 
 # CMake build directory and temporary files
 build/

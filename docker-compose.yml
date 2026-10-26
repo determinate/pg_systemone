@@ -1,0 +1,36 @@
+services:
+  pg14:
+    build:
+      context: .
+      dockerfile: Dockerfile.build
+      args:
+        PG_VERSION: "14"
+    volumes:
+      - ./dist:/dist
+
+  pg15:
+    build:
+      context: .
+      dockerfile: Dockerfile.build
+      args:
+        PG_VERSION: "15"
+    volumes:
+      - ./dist:/dist
+
+  pg16:
+    build:
+      context: .
+      dockerfile: Dockerfile.build
+      args:
+        PG_VERSION: "16"
+    volumes:
+      - ./dist:/dist
+
+  pg17:
+    build:
+      context: .
+      dockerfile: Dockerfile.build
+      args:
+        PG_VERSION: "17"
+    volumes:
+      - ./dist:/dist
